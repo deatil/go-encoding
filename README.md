@@ -6,7 +6,14 @@
 *  常用的编码算法
 
 
-### 使用方法
+### 下载安装
+
+~~~go
+go get -u github.com/deatil/go-encoding
+~~~
+
+
+### 使用
 
 ~~~go
 package main
@@ -25,6 +32,14 @@ func main() {
     // Base64 编码后结果
     base64Data := encoding.Base64Encode("useData").
     fmt.Println("Base64 编码后结果：", base64Data)
+
+    // =====
+
+    // Asn1 编码
+    var p string
+    encodeStr := encoding.ForAsn1("test-data").ToBase64String()
+    encoding.FromBase64String("Ewl0ZXN0LWRhdGE=").Asn1To(&p)
+    encodeStr2 := p
 
     // XML 编码
     p := Per{
