@@ -3,6 +3,7 @@ package encoding
 import (
     "bytes"
     "errors"
+    "strings"
     "strconv"
     "encoding/csv"
     "encoding/gob"
@@ -53,6 +54,38 @@ func (this Encoding) FromBase64String(data string) Encoding {
     return this
 }
 
+// Base64URL
+func (this Encoding) FromBase64URLString(data string) Encoding {
+    this.data, this.Error = base64.URLEncoding.DecodeString(data)
+
+    return this
+}
+
+// Base64Raw
+func (this Encoding) FromBase64RawString(data string) Encoding {
+    this.data, this.Error = base64.RawStdEncoding.DecodeString(data)
+
+    return this
+}
+
+// Base64RawURL
+func (this Encoding) FromBase64RawURLString(data string) Encoding {
+    this.data, this.Error = base64.RawURLEncoding.DecodeString(data)
+
+    return this
+}
+
+// Base64Segment
+func (this Encoding) FromBase64SegmentString(data string) Encoding {
+    if l := len(data) % 4; l > 0 {
+        data += strings.Repeat("=", 4-l)
+    }
+
+    this.data, this.Error = base64.RawStdEncoding.DecodeString(data)
+
+    return this
+}
+
 // Base85
 func (this Encoding) FromBase85String(data string) Encoding {
     src := []byte(data)
@@ -89,7 +122,7 @@ func (this Encoding) FromBytesBuffer(data *bytes.Buffer) Encoding {
 // bitSize 限制长度
 // ParseBool()、ParseFloat()、ParseInt()、ParseUint()。
 // FormatBool()、FormatInt()、FormatUint()、FormatFloat()、
-func (this Encoding) FromConvert(input interface{}, base int, bitSize ...int) Encoding {
+func (this Encoding) FromConvert(input any, base int, bitSize ...int) Encoding {
     newBitSize := 0
     if len(bitSize) > 0 {
         newBitSize = bitSize[0]
@@ -154,7 +187,7 @@ func (this Encoding) FromConvertHex(data string) Encoding {
 }
 
 // Gob
-func (this Encoding) ForGob(data interface{}) Encoding {
+func (this Encoding) ForGob(data any) Encoding {
     buf := bytes.NewBuffer(nil)
 
     enc := gob.NewEncoder(buf)
@@ -170,7 +203,7 @@ func (this Encoding) ForGob(data interface{}) Encoding {
 }
 
 // Xml
-func (this Encoding) ForXML(data interface{}) Encoding {
+func (this Encoding) ForXML(data any) Encoding {
     buf := bytes.NewBuffer(nil)
 
     enc := xml.NewEncoder(buf)
@@ -186,14 +219,14 @@ func (this Encoding) ForXML(data interface{}) Encoding {
 }
 
 // JSON
-func (this Encoding) ForJSON(data interface{}) Encoding {
+func (this Encoding) ForJSON(data any) Encoding {
     this.data, this.Error = json.Marshal(data)
 
     return this
 }
 
 // Binary
-func (this Encoding) ForBinary(data interface{}) Encoding {
+func (this Encoding) ForBinary(data any) Encoding {
     buf := bytes.NewBuffer(nil)
 
     err := binary.Write(buf, binary.LittleEndian, data)
@@ -225,7 +258,7 @@ func (this Encoding) ForCsv(data [][]string) Encoding {
 }
 
 // Asn1
-func (this Encoding) ForAsn1(data interface{}, params ...string) Encoding {
+func (this Encoding) ForAsn1(data any, params ...string) Encoding {
     if len(params) > 0 {
         this.data, this.Error = asn1.MarshalWithParams(data, params[0])
     } else {
