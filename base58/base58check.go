@@ -25,12 +25,12 @@ func CheckEncode(input []byte, version byte) string {
 
     b = append(b, cksum[:]...)
 
-    return Encode(b)
+    return StdEncoding.EncodeToString(b)
 }
 
 // 检测解码
 func CheckDecode(input string) (result []byte, version byte, err error) {
-    decoded := Decode(input)
+    decoded, _ := StdEncoding.DecodeString(input)
     if len(decoded) < 5 {
         return nil, 0, ErrInvalidFormat
     }

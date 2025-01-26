@@ -21,11 +21,11 @@ const encodeStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345678
 // be a 91-byte string that does not contain CR or LF ('\r', '\n').
 func NewEncoding(encoder string) *Encoding {
     if len(encoder) != 91 {
-        panic("encoding alphabet is not 91 bytes long")
+        panic("base91: encoding alphabet is not 91 bytes long")
     }
     for i := 0; i < len(encoder); i++ {
         if encoder[i] == '\n' || encoder[i] == '\r' {
-            panic("encoding alphabet contains newline character")
+            panic("base91: encoding alphabet contains newline character")
         }
     }
 
