@@ -13,7 +13,7 @@ const (
     encoderSize = len(stdEncoder)
 )
 
-var invalidEncoderSize = fmt.Errorf("quotedprintable: reflect str lenght must be %d.", encoderSize)
+var invalidEncoderSize = fmt.Errorf("go-encoding/quotedprintable: reflect str lenght must be %d.", encoderSize)
 
 var StdEncoding, _ = NewEncoding(stdEncoder)
 

@@ -15,7 +15,7 @@ func TestLooksLikeMorse(t *testing.T) {
 }
 
 func TestDecodeBrokenITU(t *testing.T) {
-    _, err := DecodeITU("-- ?.. ...")
+    _, err := ITUEncoding.Decode("-- ?.. ...")
     if err == nil {
         t.Error("expected error")
     }

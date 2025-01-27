@@ -5,53 +5,67 @@ import (
     "strings"
 )
 
-// Decode decodes morse code in `s` using `alphabet` mapping
-func Decode(s string, alphabet map[string]string, letterSeparator, wordSeparator string) (string, error) {
+/*
+ * Encodings
+ */
+
+// An Encoding is a radix 62 encoding/decoding scheme, defined by a 62-character alphabet.
+type Encoding struct {
+    alphabet        map[string]string
+    letterSeparator string
+    wordSeparator   string
+}
+
+func NewEncoding(alphabet map[string]string, letterSeparator, wordSeparator string) *Encoding {
+    e := new(Encoding)
+    e.alphabet = alphabet
+    e.letterSeparator = letterSeparator
+    e.wordSeparator = wordSeparator
+
+    return e
+}
+
+// Encode encodes clear text in `s` using `alphabet` mapping
+func (enc *Encoding) Encode(s string) string {
     res := ""
-    for _, part := range strings.Split(s, letterSeparator) {
+    for _, part := range s {
+        p := string(part)
+        if p == " " {
+            if enc.wordSeparator != "" {
+                res += enc.wordSeparator + enc.letterSeparator
+            }
+        } else if enc.alphabet[p] != "" {
+            res += enc.alphabet[p] + enc.letterSeparator
+        }
+    }
+
+    return strings.TrimSpace(res)
+}
+
+// Decode decodes morse code in `s` using `alphabet` mapping
+func (enc *Encoding) Decode(s string) (string, error) {
+    res := ""
+    for _, part := range strings.Split(s, enc.letterSeparator) {
         found := false
-        for key, val := range alphabet {
+        for key, val := range enc.alphabet {
             if val == part {
                 res += key
                 found = true
                 break
             }
         }
-        if part == wordSeparator {
+
+        if part == enc.wordSeparator {
             res += " "
             found = true
         }
+
         if !found {
-            return res, fmt.Errorf("unknown character " + part)
+            return res, fmt.Errorf("go-encoding/morse: unknown character " + part)
         }
     }
+
     return res, nil
-}
-
-// Encode encodes clear text in `s` using `alphabet` mapping
-func Encode(s string, alphabet map[string]string, letterSeparator, wordSeparator string) string {
-    res := ""
-    for _, part := range s {
-        p := string(part)
-        if p == " " {
-            if wordSeparator != "" {
-                res += wordSeparator + letterSeparator
-            }
-        } else if morseITU[p] != "" {
-            res += morseITU[p] + letterSeparator
-        }
-    }
-    return strings.TrimSpace(res)
-}
-
-// DecodeITU translates international morse code (ITU) to text
-func DecodeITU(s string) (string, error) {
-    return Decode(s, morseITU, " ", "/")
-}
-
-// EncodeITU translates text to international morse code (ITU)
-func EncodeITU(s string) string {
-    return Encode(s, morseITU, " ", "/")
 }
 
 // LooksLikeMorse returns true if string seems to be a morse encoded string
@@ -59,13 +73,18 @@ func LooksLikeMorse(s string) bool {
     if len(s) < 1 {
         return false
     }
+
     for _, b := range s {
         if b != '-' && b != '.' && b != ' ' {
             return false
         }
     }
+
     return true
 }
+
+// ITUEncoding is the standard morse ITU encoding.
+var ITUEncoding = NewEncoding(morseITU, " ", "/")
 
 var (
     morseITU = map[string]string{

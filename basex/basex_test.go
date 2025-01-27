@@ -7,7 +7,7 @@ import (
 
 func Test_Encode(t *testing.T) {
     for _, s := range SamplesStd {
-        encoded := Base62Encoding.Encode([]byte(s.source))
+        encoded := Base62Encoding.EncodeToString([]byte(s.source))
         if len(encoded) == len(s.target) && encoded == s.target {
             t.Logf("source: %-15s\ttarget: %s", s.source, s.target)
         } else {
@@ -18,7 +18,7 @@ func Test_Encode(t *testing.T) {
 
 func Test_Decode(t *testing.T) {
     for _, s := range SamplesStd {
-        decoded, err := Base62Encoding.Decode(s.target)
+        decoded, err := Base62Encoding.DecodeString(s.target)
         if err != nil {
             t.Error(err)
             continue
@@ -35,7 +35,7 @@ func Test_Decode(t *testing.T) {
 
 func Test_DecodeError(t *testing.T) {
     for _, s := range SamplesErr {
-        decoded, err := Base62Encoding.Decode(s.target)
+        decoded, err := Base62Encoding.DecodeString(s.target)
         if err != nil {
             t.Logf("%s: \"%c\"", err.Error(), err)
             continue

@@ -4,6 +4,8 @@ import (
     "fmt"
     "bytes"
     "errors"
+    "unsafe"
+    "reflect"
     "strconv"
     "math/big"
 )
@@ -20,8 +22,20 @@ const (
     Base62InvalidKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
+var (
+    // 编码类型
+    Base2Encoding            = NewEncoding(Base2Key)
+    Base16Encoding           = NewEncoding(Base16Key)
+    Base16InvalidKeyEncoding = NewEncoding(Base16InvalidKey)
+    Base32Encoding           = NewEncoding(Base32Key)
+    Base58Encoding           = NewEncoding(Base58Key)
+    Base62Encoding           = NewEncoding(Base62Key)
+    Base62_2Encoding         = NewEncoding(Base62_2Key)
+    Base62InvalidEncoding    = NewEncoding(Base62InvalidKey)
+)
+
 // Basex
-type Basex struct {
+type Encoding struct {
     base        *big.Int
     alphabet    []rune
     alphabetMap map[rune]int
@@ -29,10 +43,39 @@ type Basex struct {
     Error       error
 }
 
+// 构造函数
+// Example alphabets:
+//   - base2: 01
+//   - base16: 0123456789abcdef
+//   - base32: 0123456789ABCDEFGHJKMNPQRSTVWXYZ
+//   - base58: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
+//   - base62: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+func NewEncoding(alphabet string) *Encoding {
+    runes := []rune(alphabet)
+    runeMap := make(map[rune]int)
+
+    enc := &Encoding{}
+
+    for i := 0; i < len(runes); i++ {
+        if _, ok := runeMap[runes[i]]; ok {
+            enc.Error = errors.New("go-encoding/basex: Ambiguous alphabet.")
+            return enc
+        }
+
+        runeMap[runes[i]] = i
+    }
+
+    enc.base = big.NewInt(int64(len(runes)))
+    enc.alphabet = runes
+    enc.alphabetMap = runeMap
+
+    return enc
+}
+
 // 编码
-func (this Basex) Encode(source []byte) string {
+func (enc *Encoding) Encode(source []byte) []byte {
     if len(source) == 0 {
-        return ""
+        return nil
     }
 
     var (
@@ -40,7 +83,7 @@ func (this Basex) Encode(source []byte) string {
         k   = 0
     )
     for ; source[k] == 0 && k < len(source)-1; k++ {
-        res.WriteRune(this.alphabet[0])
+        res.WriteRune(enc.alphabet[0])
     }
 
     var (
@@ -49,8 +92,8 @@ func (this Basex) Encode(source []byte) string {
     )
 
     for sourceInt.Uint64() > 0 {
-        sourceInt.DivMod(sourceInt, this.base, &mod)
-        res.WriteRune(this.alphabet[mod.Uint64()])
+        sourceInt.DivMod(sourceInt, enc.base, &mod)
+        res.WriteRune(enc.alphabet[mod.Uint64()])
     }
 
     var (
@@ -64,34 +107,40 @@ func (this Basex) Encode(source []byte) string {
         j--
     }
 
+    return buf
+}
+
+// EncodeToString returns the basex encoding of src.
+func (enc *Encoding) EncodeToString(src []byte) string {
+    buf := enc.Encode(src)
     return string(buf)
 }
 
 // 解码
-func (this Basex) Decode(source string) ([]byte, error) {
+func (enc *Encoding) Decode(source []byte) ([]byte, error) {
     if len(source) == 0 {
-        return []byte{}, nil
+        return nil, nil
     }
 
     var (
-        data = []rune(source)
+        data = []rune(string(source))
         dest = big.NewInt(0)
     )
 
     for i := 0; i < len(data); i++ {
-        value, ok := this.alphabetMap[data[i]]
+        value, ok := enc.alphabetMap[data[i]]
         if !ok {
-            return nil, errors.New("non Base Character")
+            return nil, errors.New("go-encoding/basex: non Base Character")
         }
 
-        dest.Mul(dest, this.base)
+        dest.Mul(dest, enc.base)
         if value > 0 {
             dest.Add(dest, big.NewInt(int64(value)))
         }
     }
 
     k := 0
-    for ; data[k] == this.alphabet[0] && k < len(data)-1; k++ {
+    for ; data[k] == enc.alphabet[0] && k < len(data)-1; k++ {
     }
 
     buf := dest.Bytes()
@@ -100,8 +149,15 @@ func (this Basex) Decode(source string) ([]byte, error) {
     return append(res, buf...), nil
 }
 
+// DecodeString returns the bytes represented by the basex string s.
+func (enc *Encoding) DecodeString(s string) ([]byte, error) {
+    sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+    bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
+    return enc.Decode(*(*[]byte)(unsafe.Pointer(&bh)))
+}
+
 // 补码
-func (this Basex) padding(s string, minlen int) string {
+func (enc *Encoding) padding(s string, minlen int) string {
     if len(s) >= minlen {
         return s
     }
@@ -109,47 +165,3 @@ func (this Basex) padding(s string, minlen int) string {
     format := fmt.Sprint(`%0`, strconv.Itoa(minlen), "s")
     return fmt.Sprintf(format, s)
 }
-
-// 构造函数
-// Example alphabets:
-//   - base2: 01
-//   - base16: 0123456789abcdef
-//   - base32: 0123456789ABCDEFGHJKMNPQRSTVWXYZ
-//   - base58: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
-//   - base62: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-func New(alphabet string) Basex {
-    runes := []rune(alphabet)
-    runeMap := make(map[rune]int)
-
-    basex := Basex{}
-
-    for i := 0; i < len(runes); i++ {
-        if _, ok := runeMap[runes[i]]; ok {
-            basex.Error = errors.New("Ambiguous alphabet.")
-            return basex
-        }
-
-        runeMap[runes[i]] = i
-    }
-
-    basex.base = big.NewInt(int64(len(runes)))
-    basex.alphabet = runes
-    basex.alphabetMap = runeMap
-
-    return basex
-}
-
-var (
-    // 别名
-    NewEncoding = New
-
-    // 编码类型
-    Base2Encoding            = NewEncoding(Base2Key)
-    Base16Encoding           = NewEncoding(Base16Key)
-    Base16InvalidKeyEncoding = NewEncoding(Base16InvalidKey)
-    Base32Encoding           = NewEncoding(Base32Key)
-    Base58Encoding           = NewEncoding(Base58Key)
-    Base62Encoding           = NewEncoding(Base62Key)
-    Base62_2Encoding         = NewEncoding(Base62_2Key)
-    Base62InvalidEncoding    = NewEncoding(Base62InvalidKey)
-)

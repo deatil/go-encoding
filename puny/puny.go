@@ -22,10 +22,10 @@ const (
 )
 
 var (
-    invalidCharaterErr = errors.New("Non-ASCCI codepoint found in src")
-    overFlowErr        = errors.New("Overflow")
-    inputError         = errors.New("Bad Input")
-    digit2codepointErr = errors.New("digit2codepoint")
+    invalidCharaterErr = errors.New("go-encoding/puny: Non-ASCCI codepoint found in src")
+    overFlowErr        = errors.New("go-encoding/puny: Overflow")
+    inputError         = errors.New("go-encoding/puny: Bad Input")
+    digit2codepointErr = errors.New("go-encoding/puny: digit2codepoint")
 )
 
 // std Encoding
