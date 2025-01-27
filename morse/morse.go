@@ -2,6 +2,8 @@ package morse
 
 import (
     "fmt"
+    "unsafe"
+    "reflect"
     "strings"
 )
 
@@ -26,9 +28,9 @@ func NewEncoding(alphabet map[string]string, letterSeparator, wordSeparator stri
 }
 
 // Encode encodes clear text in `s` using `alphabet` mapping
-func (enc *Encoding) Encode(s string) string {
+func (enc *Encoding) Encode(s []byte) []byte {
     res := ""
-    for _, part := range s {
+    for _, part := range string(s) {
         p := string(part)
         if p == " " {
             if enc.wordSeparator != "" {
@@ -39,13 +41,19 @@ func (enc *Encoding) Encode(s string) string {
         }
     }
 
-    return strings.TrimSpace(res)
+    return []byte(strings.TrimSpace(res))
+}
+
+// EncodeToString returns the base62 encoding of src.
+func (enc *Encoding) EncodeToString(src []byte) string {
+    buf := enc.Encode(src)
+    return string(buf)
 }
 
 // Decode decodes morse code in `s` using `alphabet` mapping
-func (enc *Encoding) Decode(s string) (string, error) {
+func (enc *Encoding) Decode(s []byte) ([]byte, error) {
     res := ""
-    for _, part := range strings.Split(s, enc.letterSeparator) {
+    for _, part := range strings.Split(string(s), enc.letterSeparator) {
         found := false
         for key, val := range enc.alphabet {
             if val == part {
@@ -61,11 +69,18 @@ func (enc *Encoding) Decode(s string) (string, error) {
         }
 
         if !found {
-            return res, fmt.Errorf("go-encoding/morse: unknown character " + part)
+            return []byte(res), fmt.Errorf("go-encoding/morse: unknown character " + part)
         }
     }
 
-    return res, nil
+    return []byte(res), nil
+}
+
+// DecodeString returns the bytes represented by the base62 string s.
+func (enc *Encoding) DecodeString(s string) ([]byte, error) {
+    sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+    bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
+    return enc.Decode(*(*[]byte)(unsafe.Pointer(&bh)))
 }
 
 // LooksLikeMorse returns true if string seems to be a morse encoded string

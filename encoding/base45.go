@@ -6,10 +6,9 @@ import (
 
 // Base45
 func (this Encoding) Base45Decode() Encoding {
-    data := string(this.data)
-    decoded, err := base45.Decode(data)
+    decoded, err := base45.StdEncoding.DecodeString(string(this.data))
 
-    this.data = []byte(decoded)
+    this.data = decoded
     this.Error = err
 
     return this
@@ -17,7 +16,7 @@ func (this Encoding) Base45Decode() Encoding {
 
 // 编码 Base45
 func (this Encoding) Base45Encode() Encoding {
-    data := base45.Encode(string(this.data))
+    data := base45.StdEncoding.EncodeToString(this.data)
     this.data = []byte(data)
 
     return this
