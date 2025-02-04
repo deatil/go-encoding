@@ -36,6 +36,7 @@ func NewEncoding(encoder string) *Encoding {
     if len(encoder) != 91 {
         panic("go-encoding/base91: encoding alphabet is not 91 bytes long")
     }
+
     for i := 0; i < len(encoder); i++ {
         if encoder[i] == '\n' || encoder[i] == '\r' {
             panic("go-encoding/base91: encoding alphabet contains newline character")
@@ -49,9 +50,11 @@ func NewEncoding(encoder string) *Encoding {
         // 0xff indicates that this entry in the decode map is not in the encoding alphabet.
         e.decodeMap[i] = 0xff
     }
+
     for i := 0; i < len(encoder); i++ {
         e.decodeMap[encoder[i]] = byte(i)
     }
+
     return e
 }
 
