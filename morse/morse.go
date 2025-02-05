@@ -7,6 +7,60 @@ import (
     "strings"
 )
 
+var morseITU = map[string]string{
+    "a":  ".-",
+    "b":  "-...",
+    "c":  "-.-.",
+    "d":  "-..",
+    "e":  ".",
+    "f":  "..-.",
+    "g":  "--.",
+    "h":  "....",
+    "i":  "..",
+    "j":  ".---",
+    "k":  "-.-",
+    "l":  ".-..",
+    "m":  "--",
+    "n":  "-.",
+    "o":  "---",
+    "p":  ".--.",
+    "q":  "--.-",
+    "r":  ".-.",
+    "s":  "...",
+    "t":  "-",
+    "u":  "..-",
+    "v":  "...-",
+    "w":  ".--",
+    "x":  "-..-",
+    "y":  "-.--",
+    "z":  "--..",
+    "ä":  ".-.-",
+    "ö":  "---.",
+    "ü":  "..--",
+    "Ch": "----",
+    "0":  "-----",
+    "1":  ".----",
+    "2":  "..---",
+    "3":  "...--",
+    "4":  "....-",
+    "5":  ".....",
+    "6":  "-....",
+    "7":  "--...",
+    "8":  "---..",
+    "9":  "----.",
+    ".":  ".-.-.-",
+    ",":  "--..--",
+    "?":  "..--..",
+    "!":  "..--.",
+    ":":  "---...",
+    "\"": ".-..-.",
+    "'":  ".----.",
+    "=":  "-...-",
+}
+
+// ITUEncoding is the standard morse ITU encoding.
+var ITUEncoding = NewEncoding(morseITU, " ", "/")
+
 /*
  * Encodings
  */
@@ -26,6 +80,10 @@ func NewEncoding(alphabet map[string]string, letterSeparator, wordSeparator stri
 
     return e
 }
+
+/*
+ * Encoder
+ */
 
 // Encode encodes clear text in `s` using `alphabet` mapping
 func (enc *Encoding) Encode(s []byte) []byte {
@@ -49,6 +107,10 @@ func (enc *Encoding) EncodeToString(src []byte) string {
     buf := enc.Encode(src)
     return string(buf)
 }
+
+/*
+ * Decoder
+ */
 
 // Decode decodes morse code in `s` using `alphabet` mapping
 func (enc *Encoding) Decode(s []byte) ([]byte, error) {
@@ -97,59 +159,3 @@ func LooksLikeMorse(s string) bool {
 
     return true
 }
-
-// ITUEncoding is the standard morse ITU encoding.
-var ITUEncoding = NewEncoding(morseITU, " ", "/")
-
-var (
-    morseITU = map[string]string{
-        "a":  ".-",
-        "b":  "-...",
-        "c":  "-.-.",
-        "d":  "-..",
-        "e":  ".",
-        "f":  "..-.",
-        "g":  "--.",
-        "h":  "....",
-        "i":  "..",
-        "j":  ".---",
-        "k":  "-.-",
-        "l":  ".-..",
-        "m":  "--",
-        "n":  "-.",
-        "o":  "---",
-        "p":  ".--.",
-        "q":  "--.-",
-        "r":  ".-.",
-        "s":  "...",
-        "t":  "-",
-        "u":  "..-",
-        "v":  "...-",
-        "w":  ".--",
-        "x":  "-..-",
-        "y":  "-.--",
-        "z":  "--..",
-        "ä":  ".-.-",
-        "ö":  "---.",
-        "ü":  "..--",
-        "Ch": "----",
-        "0":  "-----",
-        "1":  ".----",
-        "2":  "..---",
-        "3":  "...--",
-        "4":  "....-",
-        "5":  ".....",
-        "6":  "-....",
-        "7":  "--...",
-        "8":  "---..",
-        "9":  "----.",
-        ".":  ".-.-.-",
-        ",":  "--..--",
-        "?":  "..--..",
-        "!":  "..--.",
-        ":":  "---...",
-        "\"": ".-..-.",
-        "'":  ".----.",
-        "=":  "-...-",
-    }
-)

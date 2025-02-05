@@ -3,6 +3,7 @@ package basex
 import (
     "bytes"
     "testing"
+    "reflect"
 )
 
 func Test_Encode(t *testing.T) {
@@ -98,4 +99,36 @@ var SamplesErr = []*Sample{
     NewSample("", "Hello, World!"),
     NewSample("", "哈哈"),
     NewSample("", "はは"),
+}
+
+func Test_Encode_Check(t *testing.T) {
+    var cases = []struct {
+        name string
+        src  []byte
+        enc  string
+    }{
+        {
+            "index-1",
+            []byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255},
+            "0rwg9z1idsugqv3",
+        },
+    }
+
+    for _, c := range cases {
+        t.Run(c.name, func(t *testing.T) {
+            str := Base36Encoding.EncodeToString(c.src)
+            if !reflect.DeepEqual(str, c.enc) {
+                t.Errorf("EncodeToString() = %v, want %v", str, c.enc)
+            }
+
+            got, err := Base36Encoding.DecodeString(c.enc)
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            if !reflect.DeepEqual(got, c.src) {
+                t.Errorf("DecodeString() = %v, want %v", got, c.src)
+            }
+        })
+    }
 }

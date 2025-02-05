@@ -29,18 +29,23 @@ var (
 )
 
 // std Encoding
-var StdEncoding = NewPunyEncoding()
+var StdEncoding = NewEncoding()
+
+/*
+ * Encodings
+ */
 
 type Encoding struct{}
 
-func NewPunyEncoding() *Encoding {
+func NewEncoding() *Encoding {
     return &Encoding{}
 }
 
-func (p *Encoding) EncodedLen(n int) int {
-    return n
-}
+/*
+ * Encoder
+ */
 
+// Encode returns the puny encoding of src.
 func (p *Encoding) Encode(src []byte) ([]byte, error) {
     n := initialN
     delta := 0
@@ -134,10 +139,15 @@ func (p *Encoding) EncodeToString(src []byte) (string, error) {
     return string(buf), err
 }
 
-func (p *Encoding) DecodedLen(n int) int {
+func (p *Encoding) EncodedLen(n int) int {
     return n
 }
 
+/*
+ * Decoder
+ */
+
+// Decode returns the bytes represented by the puny string s.
 func (p *Encoding) Decode(src []byte) ([]byte, error) {
     // Decoding procedure explained in detail in RFC 3492.
     n := initialN
@@ -229,4 +239,8 @@ func (p *Encoding) DecodeString(s string) ([]byte, error) {
     sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
     bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
     return p.Decode(*(*[]byte)(unsafe.Pointer(&bh)))
+}
+
+func (p *Encoding) DecodedLen(n int) int {
+    return n
 }

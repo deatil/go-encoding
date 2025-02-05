@@ -60,19 +60,6 @@ func Test_DecodeString(t *testing.T) {
     }
 }
 
-func Test_DecodeError(t *testing.T) {
-    for _, s := range SamplesErr {
-        decoded, err := StdEncoding.Decode(s.targetBytes)
-        if err != nil {
-            t.Logf("%s: \"%c\"", err.Error(), err)
-            continue
-        }
-
-        str := string(decoded)
-        t.Errorf("An error should have occurred, instead of returning \"%s\"", str)
-    }
-}
-
 func Test_EncodeWithCustomAlphabet(t *testing.T) {
     for _, s := range SamplesWithAlphabet {
         encoded := NewEncoding(s.alphabet).Encode([]byte(s.source))
@@ -98,6 +85,19 @@ func Test_DecodeWithCustomAlphabet(t *testing.T) {
             str := string(decoded)
             t.Errorf("target: %-15s\texpected source: %s(%d)\tactual source: %s(%d)", s.target, s.source, len(s.source), str, len(str))
         }
+    }
+}
+
+func Test_DecodeError(t *testing.T) {
+    for _, s := range SamplesErr {
+        decoded, err := StdEncoding.Decode(s.targetBytes)
+        if err != nil {
+            t.Logf("%s: \"%c\"", err.Error(), err)
+            continue
+        }
+
+        str := string(decoded)
+        t.Errorf("An error should have occurred, instead of returning \"%s\"", str)
     }
 }
 

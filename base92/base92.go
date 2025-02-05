@@ -12,11 +12,16 @@ const (
 )
 
 // encodeStd is the standard base92 encoding alphabet
-const encodeStd = " !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+const encodeStd = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-:+=^!/*?&<>()[]{}@%$#|;,_~`\""
 
 // StdEncoding is the default encoding enc.
 var StdEncoding = NewEncoding(encodeStd)
 
+/*
+ * Encodings
+ */
+
+// An Encoding is a base 92 encoding/decoding scheme defined by a 92-character alphabet.
 type Encoding struct {
     encode    [92]byte
     decodeMap [128]byte
@@ -26,7 +31,7 @@ type Encoding struct {
 // be a 92-byte string that does not contain CR or LF ('\r', '\n').
 func NewEncoding(encoder string) *Encoding {
     if len(encoder) != 92 {
-        panic("go-encoding/base91: encoding alphabet is not 92 bytes long")
+        panic("go-encoding/base92: encoding alphabet is not 92 bytes long")
     }
 
     for i := 0; i < len(encoder); i++ {

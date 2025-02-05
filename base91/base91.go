@@ -24,6 +24,10 @@ const encodeStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345678
 // hyphen (0x2d), and backslash (0x5c).
 var StdEncoding = NewEncoding(encodeStd)
 
+/*
+ * Encodings
+ */
+
 // An Encoding is a base 91 encoding/decoding scheme defined by a 91-character alphabet.
 type Encoding struct {
     encode    [91]byte

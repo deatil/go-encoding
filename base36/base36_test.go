@@ -1,4 +1,4 @@
-package base92
+package base36
 
 import (
     "bytes"
@@ -168,10 +168,6 @@ func NewSampleWithAlphabet(source, target, alphabet string) *Sample {
     return &Sample{source: source, target: target, sourceBytes: []byte(source), targetBytes: []byte(target), alphabet: alphabet}
 }
 
-// encodeStdTest use encodeStd to replace `;"` to ` '`
-const encodeStdTest = " !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-const encodeStdTest2 = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_abcdefghijklmnopqrstuvwxyz{|}~"
-
 type Sample struct {
     source      string
     target      string
@@ -182,71 +178,68 @@ type Sample struct {
 
 var SamplesStd = []*Sample{
     NewSample("", ""),
-    NewSample("f", "1a"),
-    NewSample("fo", "393"),
-    NewSample("foo", "8VdP"),
-    NewSample("foob", "n\"1=`"),
-    NewSample("fooba", "=/o>zJ"),
-    NewSample("foobar", "21!/2`*G"),
+    NewSample("f", "2u"),
+    NewSample("fo", "k8f"),
+    NewSample("foo", "3zvxr"),
+    NewSample("foob", "sf742q"),
+    NewSample("fooba", "5m42kzfl"),
+    NewSample("foobar", "13x8yd7ywi"),
 
-    NewSample("su", "3Jp"),
-    NewSample("sur", "9+`>"),
-    NewSample("sure", "r3U-1"),
-    NewSample("sure.", "(m5^vq"),
-    NewSample("asure.", "1#+m[Bem"),
-    NewSample("easure.", "5PN!3(DX>"),
-    NewSample("leasure.", "gN#iXt$=}e"),
+    NewSample("su", "mt1"),
+    NewSample("sur", "4i6ia"),
+    NewSample("sure", "w1aa1x"),
+    NewSample("sure.", "6bt53hny"),
+    NewSample("asure.", "11zbcm20j2"),
+    NewSample("easure.", "7sz7l367x2m"),
+    NewSample("leasure.", "1ncbu0pxvv6em"),
 
-    NewSample("=", "Z"),
-    NewSample(">", "."),
-    NewSample("?", "-"),
-    NewSample("11", "1I@"),
-    NewSample("111", "4c@|"),
-    NewSample("1111", "bL{~5"),
-    NewSample("11111", "w5iL>F"),
-    NewSample("111111", "~iHN3eV"),
+    NewSample("=", "1p"),
+    NewSample(">", "1q"),
+    NewSample("?", "1r"),
+    NewSample("11", "9pt"),
+    NewSample("111", "1x3jl"),
+    NewSample("1111", "dnd7ap"),
+    NewSample("11111", "2p25vw35"),
+    NewSample("111111", "j67dus6cx"),
 
-    NewSample("Hello, World!", "k3f/B6!rQL=RhJ?d"),
-    NewSample("你好，世界！", "1m&5KqaKycjNt]Y8I0FkS:x"),
-    NewSample("こんにちは", "5rIFEY^zgV@2jOj{s|z"),
-    NewSample("안녕하십니까", "1q=eNur3aBy#78Cu:Zjn[`A"),
+    NewSample("Hello, World!", "fg3h7vqw7een6jwwnzmp"),
+    NewSample("你好，世界！", "j0sguou3jtppn6fagdqrb3kre1z5"),
+    NewSample("こんにちは", "1w6pjye0qjvyw4xul6ds5jfz"),
+    NewSample("안녕하십니까", "jo9sbh1ov904nwwy5gosugf1cmfg"),
 
-    NewSample(string([]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255}), "01hQh.Jm{XcF^"),
+    NewSample(string([]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255}), "0rwg9z1idsugqv3"),
 }
 
 var SamplesWithAlphabet = []*Sample{
-    NewSampleWithAlphabet("", "", encodeStdTest),
-    NewSampleWithAlphabet("f", "!+", encodeStdTest),
-    NewSampleWithAlphabet("fo", "$*$", encodeStdTest),
-    NewSampleWithAlphabet("foo", ")[.U", encodeStdTest),
-    NewSampleWithAlphabet("foob", "8~!e}", encodeStdTest),
-    NewSampleWithAlphabet("fooba", "eh9mEO", encodeStdTest),
-    NewSampleWithAlphabet("foobar", "#!gh#}iL", encodeStdTest),
+    NewSampleWithAlphabet("", "", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("f", "2a", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("fo", "q8l", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("foo", "3fbdx", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("foob", "yl742w", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("fooba", "5s42qflr", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("foobar", "13d8ej7eco", "0123456789ghijklmnopqrstuvwxyzabcdef"),
 
-    NewSampleWithAlphabet("su", "$O:", encodeStdTest),
-    NewSampleWithAlphabet("sur", "*d}m", encodeStdTest),
-    NewSampleWithAlphabet("sure", "=$Zb!", encodeStdTest),
-    NewSampleWithAlphabet("sure.", "n7&fA<", encodeStdTest),
-    NewSampleWithAlphabet("asure.", "!wd7pG/7", encodeStdTest),
-    NewSampleWithAlphabet("easure.", "&USg$nI^m", encodeStdTest),
-    NewSampleWithAlphabet("leasure.", "1Sw3^?ves/", encodeStdTest),
+    NewSampleWithAlphabet("su", "sz1", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("sur", "4o6og", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("sure", "c1gg1d", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("sure.", "6hz53nte", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("asure.", "11fhis20p2", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("easure.", "7yf7r367d2s", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("leasure.", "1tiha0vdbb6ks", "0123456789ghijklmnopqrstuvwxyzabcdef"),
 
-    NewSampleWithAlphabet("=", "`", encodeStdTest),
-    NewSampleWithAlphabet(">", "a", encodeStdTest),
-    NewSampleWithAlphabet("?", "b", encodeStdTest),
-    NewSampleWithAlphabet("11", "!Nt", encodeStdTest),
-    NewSampleWithAlphabet("111", "%-tx", encodeStdTest),
-    NewSampleWithAlphabet("1111", ",Qr|&", encodeStdTest),
-    NewSampleWithAlphabet("11111", "B&3QmK", encodeStdTest),
-    NewSampleWithAlphabet("111111", "|3MS$/[", encodeStdTest),
+    NewSampleWithAlphabet("=", "1v", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet(">", "1w", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("?", "1x", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("11", "9vz", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("111", "1d3pr", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("1111", "jtj7gv", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("11111", "2v25bc35", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("111111", "p67jay6id", "0123456789ghijklmnopqrstuvwxyzabcdef"),
 
-    NewSampleWithAlphabet("Hello, World!", "5$0hG'g=VQeW2Oj.", encodeStdTest),
-    NewSampleWithAlphabet("你好，世界！", "!7k&P<+PD-4S?q_)N K5XcC", encodeStdTest),
-    NewSampleWithAlphabet("こんにちは", "&=NKJ_fE1[t#4T4r>xE", encodeStdTest),
-    NewSampleWithAlphabet("안녕하십니까", "!<e/S@=$+GDw()H@c`48p}F", encodeStdTest),
-
-    // NewSampleWithAlphabet("hello world", "Fc_$aOTdKnsM*k", encodeStdTest2),
-    // NewSampleWithAlphabet("你好", "sIb@Vyq8", encodeStdTest2),
+    NewSampleWithAlphabet("Hello, World!", "lm3n7bwc7kkt6pcctfsv", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("你好，世界！", "p0ymaua3pzvvt6lgmjwxh3qxk1f5", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("こんにちは", "1c6vpek0wpbec4dar6jy5plf", "0123456789ghijklmnopqrstuvwxyzabcdef"),
+    NewSampleWithAlphabet("안녕하십니까", "pu9yhn1ub904tcce5muyaml1islm", "0123456789ghijklmnopqrstuvwxyzabcdef"),
 }
 
 var SamplesErr = []*Sample{

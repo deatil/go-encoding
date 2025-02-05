@@ -37,6 +37,10 @@ func (e CorruptInputError) Error() string {
 
 var StdEncoding = NewEncoding(alphabet)
 
+/*
+ * Encodings
+ */
+
 // An Encoding is a base 58 encoding/decoding scheme defined by a 58-character alphabet.
 type Encoding struct {
     encode    [58]byte
@@ -71,6 +75,11 @@ func NewEncoding(encoder string) *Encoding {
     return e
 }
 
+/*
+ * Encoder
+ */
+
+// Encode encodes src using the encoding enc.
 func (enc *Encoding) Encode(b []byte) []byte {
     x := new(big.Int)
     x.SetBytes(b)
@@ -118,6 +127,10 @@ func (enc *Encoding) EncodeToString(src []byte) string {
 
     return string(answer)
 }
+
+/*
+ * Decoder
+ */
 
 // Decode decodes src using the encoding enc. It writes at most DecodedLen(len(src))
 // bytes to dst and returns the number of bytes written. If src contains invalid base58

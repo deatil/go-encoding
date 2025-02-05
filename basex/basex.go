@@ -10,69 +10,81 @@ import (
     "math/big"
 )
 
-// 常用 key
 const (
-    Base2Key         = "01"
-    Base16Key        = "0123456789ABCDEF"
-    Base16InvalidKey = "0123456789abcdef"
-    Base32Key        = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-    Base58Key        = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-    Base62Key        = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    Base62_2Key      = "vPh7zZwA2LyU4bGq5tcVfIMxJi6XaSoK9CNp0OWljYTHQ8REnmu31BrdgeDkFs"
-    Base62InvalidKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    encodeBase2         = "01"
+    encodeBase16        = "0123456789ABCDEF"
+    encodeBase16Invalid = "0123456789abcdef"
+    encodeBase32        = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+    encodeBase36        = "0123456789abcdefghijklmnopqrstuvwxyz"
+    encodeBase58        = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+    encodeBase62        = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    encodeBase62Random  = "vPh7zZwA2LyU4bGq5tcVfIMxJi6XaSoK9CNp0OWljYTHQ8REnmu31BrdgeDkFs"
+    encodeBase62Invalid = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
 var (
-    // 编码类型
-    Base2Encoding            = NewEncoding(Base2Key)
-    Base16Encoding           = NewEncoding(Base16Key)
-    Base16InvalidKeyEncoding = NewEncoding(Base16InvalidKey)
-    Base32Encoding           = NewEncoding(Base32Key)
-    Base58Encoding           = NewEncoding(Base58Key)
-    Base62Encoding           = NewEncoding(Base62Key)
-    Base62_2Encoding         = NewEncoding(Base62_2Key)
-    Base62InvalidEncoding    = NewEncoding(Base62InvalidKey)
+    Base2Encoding         = NewEncoding(encodeBase2)
+    Base16Encoding        = NewEncoding(encodeBase16)
+    Base16InvalidEncoding = NewEncoding(encodeBase16Invalid)
+    Base32Encoding        = NewEncoding(encodeBase32)
+    Base36Encoding        = NewEncoding(encodeBase36)
+    Base58Encoding        = NewEncoding(encodeBase58)
+    Base62Encoding        = NewEncoding(encodeBase62)
+    Base62RandomEncoding  = NewEncoding(encodeBase62Random)
+    Base62InvalidEncoding = NewEncoding(encodeBase62Invalid)
 )
 
-// Basex
-type Encoding struct {
-    base        *big.Int
-    alphabet    []rune
-    alphabetMap map[rune]int
+/*
+ * Encodings
+ */
 
-    Error       error
+// An Encoding is a base radix encoding/decoding scheme defined by a radix-character alphabet.
+type Encoding struct {
+    encode    []rune
+    decodeMap map[rune]int
+    radix     *big.Int
 }
 
-// 构造函数
+// NewEncoding returns a new Encoding defined by the given alphabet, which must
+// be a radix-byte string that does not contain CR or LF ('\r', '\n').
 // Example alphabets:
 //   - base2: 01
 //   - base16: 0123456789abcdef
 //   - base32: 0123456789ABCDEFGHJKMNPQRSTVWXYZ
 //   - base58: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
 //   - base62: 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-func NewEncoding(alphabet string) *Encoding {
-    runes := []rune(alphabet)
-    runeMap := make(map[rune]int)
+func NewEncoding(encoder string) *Encoding {
+    for i := 0; i < len(encoder); i++ {
+        if encoder[i] == '\n' || encoder[i] == '\r' {
+            panic("go-encoding/basex: encoding alphabet contains newline character")
+        }
+    }
+
+    runes := []rune(encoder)
+    decodeMap := make(map[rune]int)
 
     enc := &Encoding{}
 
     for i := 0; i < len(runes); i++ {
-        if _, ok := runeMap[runes[i]]; ok {
-            enc.Error = errors.New("go-encoding/basex: Ambiguous alphabet.")
-            return enc
+        if _, ok := decodeMap[runes[i]]; ok {
+            panic("go-encoding/basex: Ambiguous alphabet.")
         }
 
-        runeMap[runes[i]] = i
+        decodeMap[runes[i]] = i
     }
 
-    enc.base = big.NewInt(int64(len(runes)))
-    enc.alphabet = runes
-    enc.alphabetMap = runeMap
+    enc.encode = runes
+    enc.decodeMap = decodeMap
+    enc.radix = big.NewInt(int64(len(runes)))
 
     return enc
 }
 
-// 编码
+/*
+ * Encoder
+ */
+
+// Encode encodes binary bytes into bytes.
 func (enc *Encoding) Encode(source []byte) []byte {
     if len(source) == 0 {
         return nil
@@ -82,8 +94,9 @@ func (enc *Encoding) Encode(source []byte) []byte {
         res bytes.Buffer
         k   = 0
     )
+
     for ; source[k] == 0 && k < len(source)-1; k++ {
-        res.WriteRune(enc.alphabet[0])
+        res.WriteRune(enc.encode[0])
     }
 
     var (
@@ -92,8 +105,8 @@ func (enc *Encoding) Encode(source []byte) []byte {
     )
 
     for sourceInt.Uint64() > 0 {
-        sourceInt.DivMod(sourceInt, enc.base, &mod)
-        res.WriteRune(enc.alphabet[mod.Uint64()])
+        sourceInt.DivMod(sourceInt, enc.radix, &mod)
+        res.WriteRune(enc.encode[mod.Uint64()])
     }
 
     var (
@@ -116,7 +129,7 @@ func (enc *Encoding) EncodeToString(src []byte) string {
     return string(buf)
 }
 
-// 解码
+// Decode decodes src using the encoding enc.
 func (enc *Encoding) Decode(source []byte) ([]byte, error) {
     if len(source) == 0 {
         return nil, nil
@@ -128,19 +141,19 @@ func (enc *Encoding) Decode(source []byte) ([]byte, error) {
     )
 
     for i := 0; i < len(data); i++ {
-        value, ok := enc.alphabetMap[data[i]]
+        value, ok := enc.decodeMap[data[i]]
         if !ok {
             return nil, errors.New("go-encoding/basex: non Base Character")
         }
 
-        dest.Mul(dest, enc.base)
+        dest.Mul(dest, enc.radix)
         if value > 0 {
             dest.Add(dest, big.NewInt(int64(value)))
         }
     }
 
     k := 0
-    for ; data[k] == enc.alphabet[0] && k < len(data)-1; k++ {
+    for ; data[k] == enc.encode[0] && k < len(data)-1; k++ {
     }
 
     buf := dest.Bytes()

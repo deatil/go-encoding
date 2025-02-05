@@ -6,23 +6,22 @@
 <img src="https://goreportcard.com/badge/github.com/deatil/go-encoding" />
 </p>
 
-[中文](README_CN.md) | English
+中文 | [English](README.md)
+
+### 项目介绍
+
+*  常用的编码解码算法
+*  算法包括: (Hex/Base32/Base36/Base45/Base58/Base62/Base64/Base85/Base91/Base92/Base100/MorseITU/JSON)
 
 
-### Desc
-
-*  data encoding/decoding pkg
-*  encodings has some (Hex/Base32/Base36/Base45/Base58/Base62/Base64/Base85/Base91/Base92/Base100/MorseITU/JSON)
-
-
-### Download
+### 下载安装
 
 ~~~go
 go get -u github.com/deatil/go-encoding
 ~~~
 
 
-### Get Starting
+### 开始使用
 
 ~~~go
 package main
@@ -35,44 +34,44 @@ import (
 func main() {
     oldData := "useData"
 
-    // Base64 Encode
+    // Base64 编码
     base64Data := encoding.
         FromString(oldData).
         Base64Encode().
         ToString()
-    fmt.Println("Base64 Encoded：", base64Data)
+    fmt.Println("Base64 编码为：", base64Data)
 
-    // Base64 Decode
+    // Base64 解码
     base64DecodeData := encoding.
         FromString(base64Data).
         Base64Decode().
         ToString()
-    fmt.Println("Base64 Decoded：", base64DecodeData)
+    fmt.Println("Base64 解码为：", base64DecodeData)
 }
 ~~~
 
 
-### Use encoding
+### 格式说明
 
 ~~~go
 base64Data := encoding.
-    FromString(oldData). // input data
-    Base64Encode().      // encoding/decoding type
-    ToString()           // output data
+    FromString(oldData). // 输入数据
+    Base64Encode().      // 编码方式/解码方式
+    ToString()           // 输出数据
 ~~~
 
 
-### Input and Output
+### 输入输出数据
 
-*  Input:
+*  输入数据:
 `FromBytes(data []byte)`, `FromString(data string)`, `FromReader(reader io.Reader)`
-*  Output:
+*  输出数据:
 `String() string`, `ToBytes() []byte`, `ToString() string`, `ToReader() io.Reader`
 
 
-### Encoding Types
+### 常用解码编码
 
-*  Decode:
+*  编码方式:
 `Base32Encode()`, `Base32RawEncode()`,  `Base32HexEncode()`,`Base32RawHexEncode()`,  `Base32EncodeWithEncoder(encoder string)`, `Base32RawEncodeWithEncoder(encoder string)`,
 `Base45Encode()`,
 `Base58Encode()`,
@@ -89,7 +88,7 @@ base64Data := encoding.
 `JSONEncode(data any)`, `JSONIteratorEncode(data any)`, `JSONIteratorIndentEncode(v any, prefix, indent string)`,
 `GobEncode(data any)`
 
-*  Encode:
+*  解码方式:
 `Base32Decode()`, `Base32RawDecode()`,  `Base32HexDecode()`,`Base32RawHexDecode()`,  `Base32DecodeWithEncoder(encoder string)`, `Base32RawDecodeWithEncoder(encoder string)`,
 `Base45Decode()`,
 `Base58Decode()`,
@@ -107,11 +106,11 @@ base64Data := encoding.
 `GobDecode(dst any)`
 
 
-### LICENSE
+### 开源协议
 
-*  The library LICENSE is `Apache2`, using the library need keep the LICENSE.
+*  本软件包遵循 `Apache2` 开源协议发布，在保留本软件包版权的情况下提供个人及商业免费使用。
 
 
-### Copyright
+### 版权
 
-*  Copyright deatil(https://github.com/deatil).
+*  本软件包所属版权归 deatil(https://github.com/deatil) 所有。
