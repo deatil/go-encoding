@@ -1,7 +1,7 @@
 package morse
 
 import (
-    "fmt"
+    "errors"
     "unsafe"
     "reflect"
     "strings"
@@ -131,7 +131,7 @@ func (enc *Encoding) Decode(s []byte) ([]byte, error) {
         }
 
         if !found {
-            return []byte(res), fmt.Errorf("go-encoding/morse: unknown character " + part)
+            return []byte(res), errors.New("go-encoding/morse: unknown character " + part)
         }
     }
 
