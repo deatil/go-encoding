@@ -63,7 +63,7 @@ func (e IllegalBase45ByteError) Error() string {
 //      11 B            23 N            35 Z
 const encodeStd = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
 
-// StdEncoding is the standard base62 encoding.
+// StdEncoding is the standard base45 encoding.
 var StdEncoding = NewEncoding(encodeStd)
 
 /*
@@ -144,10 +144,14 @@ func NewEncoding(encoder string) *Encoding {
 func (enc *Encoding) Encode(bytes []byte) []byte {
     pairs := encodePairs(bytes)
 
+    // An odd input length means the last group is a single-byte tail (two
+    // chars); a full two-byte pair is always three, even when its value < 45*45.
+    oddTail := len(bytes)%2 == 1
+
     var builder strings.Builder
     for i, pair := range pairs {
         res := encodeBase45(pair)
-        if i + 1 == len(pairs) && res[2] == 0 {
+        if i + 1 == len(pairs) && oddTail {
             for _, b := range res[:2] {
                 if len(enc.encode) > int(b) {
                     builder.WriteByte(enc.encode[b])
@@ -165,7 +169,7 @@ func (enc *Encoding) Encode(bytes []byte) []byte {
     return []byte(builder.String())
 }
 
-// EncodeToString returns the base62 encoding of src.
+// EncodeToString returns the base45 encoding of src.
 func (enc *Encoding) EncodeToString(src []byte) string {
     buf := enc.Encode(src)
     return string(buf)
@@ -216,6 +220,10 @@ func (enc *Encoding) Decode(in []byte) ([]byte, error) {
     }
 
     tripletsLength := len(triplets)
+    if tripletsLength == 0 {
+        return []byte{}, nil
+    }
+
     decoded := make([]byte, 0, tripletsLength * 2)
 
     for i := 0; i < tripletsLength - 1; i++ {
@@ -236,7 +244,7 @@ func (enc *Encoding) Decode(in []byte) ([]byte, error) {
     return decoded, nil
 }
 
-// DecodeString returns the bytes represented by the base62 string s.
+// DecodeString returns the bytes represented by the base45 string s.
 func (enc *Encoding) DecodeString(s string) ([]byte, error) {
     sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
     bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
