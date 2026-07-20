@@ -63,7 +63,7 @@ func (e IllegalBase45ByteError) Error() string {
 //      11 B            23 N            35 Z
 const encodeStd = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:"
 
-// StdEncoding is the standard base62 encoding.
+// StdEncoding is the standard base45 encoding.
 var StdEncoding = NewEncoding(encodeStd)
 
 /*
@@ -165,7 +165,7 @@ func (enc *Encoding) Encode(bytes []byte) []byte {
     return []byte(builder.String())
 }
 
-// EncodeToString returns the base62 encoding of src.
+// EncodeToString returns the base45 encoding of src.
 func (enc *Encoding) EncodeToString(src []byte) string {
     buf := enc.Encode(src)
     return string(buf)
@@ -183,6 +183,10 @@ func (enc *Encoding) EncodeToString(src []byte) string {
 //   29798 33] where the bytes are [[105 101] [116 102] [33]].  If we look
 //   at the ASCII values we get the string "ietf!".
 func (enc *Encoding) Decode(in []byte) ([]byte, error) {
+    if len(in) == 0 {
+        return nil, nil
+    }
+
     size := len(in)
 
     mod := size % 3
@@ -236,7 +240,7 @@ func (enc *Encoding) Decode(in []byte) ([]byte, error) {
     return decoded, nil
 }
 
-// DecodeString returns the bytes represented by the base62 string s.
+// DecodeString returns the bytes represented by the base45 string s.
 func (enc *Encoding) DecodeString(s string) ([]byte, error) {
     sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
     bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len, Cap: sh.Len}
