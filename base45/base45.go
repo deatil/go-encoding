@@ -147,7 +147,7 @@ func (enc *Encoding) Encode(bytes []byte) []byte {
     var builder strings.Builder
     for i, pair := range pairs {
         res := encodeBase45(pair)
-        if i + 1 == len(pairs) && res[2] == 0 {
+        if i + 1 == len(pairs) && len(bytes) % 2 != 0 {
             for _, b := range res[:2] {
                 if len(enc.encode) > int(b) {
                     builder.WriteByte(enc.encode[b])
